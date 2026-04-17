@@ -115,25 +115,14 @@ function ConversationListInner({ height, onSelected }: Props) {
           </div>
         ) : (
           <List
-            height={Math.max(height - 140, 200)}
-            itemCount={list.length}
-            itemSize={ROW_HEIGHT}
-            width="100%"
+            style={{ height: Math.max(height - 140, 200) }}
+            rowCount={list.length}
+            rowHeight={ROW_HEIGHT}
+            rowComponent={VirtualRow}
+            rowProps={{ items: list, selectedId, onSelect: handleSelect }}
             className="scrollbar-thin"
-          >
-            {({ index, style }) => {
-              const c = list[index];
-              return (
-                <ConversationRow
-                  key={c.id}
-                  conversation={c}
-                  active={selectedId === c.id}
-                  onSelect={handleSelect}
-                  style={style}
-                />
-              );
-            }}
-          </List>
+            overscanCount={6}
+          />
         )}
       </div>
     </div>
