@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 
+
 export default function Settings() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-6 animate-fade-in">
