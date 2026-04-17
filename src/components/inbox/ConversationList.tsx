@@ -1,11 +1,29 @@
-import { memo, useMemo, useState, useEffect } from "react";
-import { FixedSizeList as List } from "react-window";
+import { memo, useCallback, useMemo, useState, useEffect } from "react";
+import { List, type RowComponentProps } from "react-window";
 import { Search } from "lucide-react";
 import { conversations as seed, type Channel, type Conversation } from "@/lib/mockData";
 import { ConversationRow } from "./ConversationRow";
 import { useInboxStore, type PlatformFilter } from "@/store/inboxStore";
 
 const ROW_HEIGHT = 84;
+
+interface RowProps {
+  items: Conversation[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}
+
+function VirtualRow({ index, style, items, selectedId, onSelect }: RowComponentProps<RowProps>) {
+  const c = items[index];
+  return (
+    <ConversationRow
+      conversation={c}
+      active={selectedId === c.id}
+      onSelect={onSelect}
+      style={style}
+    />
+  );
+}
 
 const filters: { id: PlatformFilter; label: string }[] = [
   { id: "all", label: "All" },
