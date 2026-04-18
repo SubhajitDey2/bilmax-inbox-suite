@@ -1,14 +1,9 @@
-import { LayoutDashboard, Inbox, Users, Megaphone, ShieldCheck, Settings, Sparkles, LogOut } from "lucide-react";
+import { LayoutDashboard, Inbox, Users, Megaphone, ShieldCheck, Settings, Sparkles } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/useAuth";
-import { useCurrentOrg } from "@/hooks/useCurrentOrg";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 
 const main = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -24,12 +19,7 @@ const admin = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  useLocation();
-  const { user, signOut } = useAuth();
-  const { org } = useCurrentOrg();
-
-  const displayName = (user?.user_metadata?.full_name as string) ?? user?.email?.split("@")[0] ?? "User";
-  const initials = displayName.split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
+  const { pathname } = useLocation();
 
   const linkCls = (active: boolean) =>
     `flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
@@ -100,28 +90,17 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            {!collapsed ? (
-              <button className="flex w-full items-center gap-2.5 rounded-lg p-2 hover:bg-sidebar-accent/50 transition text-left">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">{initials}</div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-sidebar-accent-foreground">{displayName}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">{org?.name ?? "—"}</p>
-                </div>
-              </button>
-            ) : (
-              <button className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">{initials}</button>
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" side="top" className="w-56">
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">{user?.email}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {!collapsed ? (
+          <div className="flex items-center gap-2.5 rounded-lg p-2 hover:bg-sidebar-accent/50 transition">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">JD</div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-sidebar-accent-foreground">Jay Doe</p>
+              <p className="truncate text-[11px] text-muted-foreground">Bloom Salon</p>
+            </div>
+          </div>
+        ) : (
+          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">JD</div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );
