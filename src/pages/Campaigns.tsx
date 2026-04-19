@@ -1,65 +1,117 @@
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { campaigns } from "@/lib/mockData";
-import { Plus, Eye, Send, MailCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { Eye, Send, MailCheck } from "lucide-react";
+import { NewCampaignDialog } from "@/components/campaigns/NewCampaignDialog";
+
+interface Row {
+  id: string;
+  name: string;
+  status: string;
+  sent_count: number;
+  total_recipients: number;
+  failed_count: number;
+  created_at: string;
+}
 
 const statusCls: Record<string, string> = {
-  Live: "bg-success/15 text-success",
-  Scheduled: "bg-info/15 text-info",
-  Draft: "bg-muted text-muted-foreground",
-  Completed: "bg-primary/15 text-primary",
+  draft: "bg-muted text-muted-foreground",
+  pending_approval: "bg-warning/15 text-warning",
+  approved: "bg-info/15 text-info",
+  scheduled: "bg-info/15 text-info",
+  sending: "bg-primary/15 text-primary",
+  sent: "bg-success/15 text-success",
+  failed: "bg-destructive/15 text-destructive",
+  cancelled: "bg-secondary text-muted-foreground",
 };
 
 export default function Campaigns() {
-  const totalSent = campaigns.reduce((a, c) => a + c.sent, 0);
-  const totalRead = campaigns.reduce((a, c) => a + c.read, 0);
+  const { user } = useAuth();
+  const { primaryOrgId } = useUserRoles(user?.id);
+  const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    if (!primaryOrgId) return;
+    const { data } = await supabase
+      .from("campaigns")
+      .select("id, name, status, sent_count, total_recipients, failed_count, created_at")
+      .eq("org_id", primaryOrgId)
+      .order("created_at", { ascending: false });
+    setRows((data ?? []) as Row[]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    refresh();
+  }, [primaryOrgId]);
+
+  const totalSent = rows.reduce((a, c) => a + c.sent_count, 0);
+  const totalRecipients = rows.reduce((a, c) => a + c.total_recipients, 0);
 
   return (
     <div className="mx-auto w-full max-w-[1400px] space-y-6 p-6 animate-fade-in">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Campaigns</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Templates, broadcasts, retargeting drips.</p>
+          <p className="mt-1 text-sm text-muted-foreground">WhatsApp broadcasts using approved templates.</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-glow">
-          <Plus className="h-3.5 w-3.5" /> New Campaign
-        </button>
+        <NewCampaignDialog onCreated={refresh} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KPI icon={Send} label="Total Sent" value={totalSent.toLocaleString()} />
-        <KPI icon={MailCheck} label="Read" value={totalRead.toLocaleString()} />
-        <KPI icon={Eye} label="Read Rate" value={`${Math.round((totalRead / totalSent) * 100)}%`} />
+        <KPI icon={MailCheck} label="Recipients" value={totalRecipients.toLocaleString()} />
+        <KPI
+          icon={Eye}
+          label="Delivery Rate"
+          value={totalRecipients > 0 ? `${Math.round((totalSent / totalRecipients) * 100)}%` : "—"}
+        />
       </div>
 
       <Card className="border-border/60 bg-gradient-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-secondary/30 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Campaign</th>
-                <th className="px-4 py-2.5 font-medium">Template</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
-                <th className="px-4 py-2.5 font-medium text-right">Sent</th>
-                <th className="px-4 py-2.5 font-medium text-right">Delivered</th>
-                <th className="px-4 py-2.5 font-medium text-right">Read</th>
-              </tr>
-            </thead>
-            <tbody>
-              {campaigns.map((c) => (
-                <tr key={c.id} className="border-b border-border/50 hover:bg-secondary/30 transition">
-                  <td className="px-4 py-3 font-medium">{c.name}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.template}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusCls[c.status]}`}>{c.status}</span>
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-xs">{c.sent.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right font-mono text-xs">{c.delivered.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right font-mono text-xs">{c.read.toLocaleString()}</td>
+        {loading ? (
+          <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : rows.length === 0 ? (
+          <div className="p-12 text-center text-sm text-muted-foreground">
+            No campaigns yet. Click <strong>New Campaign</strong> to start.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-secondary/30 text-left text-[10px] uppercase tracking-widest text-muted-foreground">
+                  <th className="px-4 py-2.5 font-medium">Campaign</th>
+                  <th className="px-4 py-2.5 font-medium">Status</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Sent</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Failed</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Total</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((c) => (
+                  <tr key={c.id} className="border-b border-border/50 hover:bg-secondary/30 transition">
+                    <td className="px-4 py-3 font-medium">{c.name}</td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${statusCls[c.status]}`}>
+                        {c.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">{c.sent_count.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">{c.failed_count.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-mono text-xs">{c.total_recipients.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-mono text-[11px] text-muted-foreground">
+                      {new Date(c.created_at).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
     </div>
   );

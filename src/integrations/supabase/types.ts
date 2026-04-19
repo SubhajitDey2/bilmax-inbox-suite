@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaign_queue: {
+        Row: {
+          attempts: number
+          campaign_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          last_error: string | null
+          org_id: string
+          scheduled_for: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["queue_status"]
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          campaign_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          last_error?: string | null
+          org_id: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["queue_status"]
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          campaign_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          last_error?: string | null
+          org_id?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["queue_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_queue_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_queue_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_recipients: {
         Row: {
           campaign_id: string
@@ -113,6 +177,7 @@ export type Database = {
           template_id: string | null
           total_recipients: number
           updated_at: string
+          whatsapp_template_id: string | null
         }
         Insert: {
           audience_filter?: Json
@@ -129,6 +194,7 @@ export type Database = {
           template_id?: string | null
           total_recipients?: number
           updated_at?: string
+          whatsapp_template_id?: string | null
         }
         Update: {
           audience_filter?: Json
@@ -145,6 +211,7 @@ export type Database = {
           template_id?: string | null
           total_recipients?: number
           updated_at?: string
+          whatsapp_template_id?: string | null
         }
         Relationships: [
           {
@@ -159,6 +226,13 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "campaign_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_whatsapp_template_id_fkey"
+            columns: ["whatsapp_template_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -581,6 +655,133 @@ export type Database = {
           },
         ]
       }
+      whatsapp_accounts: {
+        Row: {
+          access_token_encrypted: string | null
+          app_secret_encrypted: string | null
+          connection_type: Database["public"]["Enums"]["whatsapp_connection_type"]
+          created_at: string
+          display_name: string
+          id: string
+          last_error: string | null
+          last_synced_at: string | null
+          meta_app_id: string | null
+          org_id: string
+          phone_number_id: string | null
+          status: Database["public"]["Enums"]["whatsapp_connection_status"]
+          updated_at: string
+          webhook_url: string | null
+          webhook_verify_token: string | null
+          whatsapp_business_account_id: string | null
+        }
+        Insert: {
+          access_token_encrypted?: string | null
+          app_secret_encrypted?: string | null
+          connection_type?: Database["public"]["Enums"]["whatsapp_connection_type"]
+          created_at?: string
+          display_name?: string
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          meta_app_id?: string | null
+          org_id: string
+          phone_number_id?: string | null
+          status?: Database["public"]["Enums"]["whatsapp_connection_status"]
+          updated_at?: string
+          webhook_url?: string | null
+          webhook_verify_token?: string | null
+          whatsapp_business_account_id?: string | null
+        }
+        Update: {
+          access_token_encrypted?: string | null
+          app_secret_encrypted?: string | null
+          connection_type?: Database["public"]["Enums"]["whatsapp_connection_type"]
+          created_at?: string
+          display_name?: string
+          id?: string
+          last_error?: string | null
+          last_synced_at?: string | null
+          meta_app_id?: string | null
+          org_id?: string
+          phone_number_id?: string | null
+          status?: Database["public"]["Enums"]["whatsapp_connection_status"]
+          updated_at?: string
+          webhook_url?: string | null
+          webhook_verify_token?: string | null
+          whatsapp_business_account_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_accounts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_templates: {
+        Row: {
+          approved_at: string | null
+          body: string
+          category: Database["public"]["Enums"]["template_category"]
+          created_at: string
+          created_by: string | null
+          id: string
+          language: string
+          meta_template_id: string | null
+          name: string
+          org_id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["template_status"]
+          submitted_at: string | null
+          updated_at: string
+          variables: Json
+        }
+        Insert: {
+          approved_at?: string | null
+          body: string
+          category?: Database["public"]["Enums"]["template_category"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          language?: string
+          meta_template_id?: string | null
+          name: string
+          org_id: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["template_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Update: {
+          approved_at?: string | null
+          body?: string
+          category?: Database["public"]["Enums"]["template_category"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          language?: string
+          meta_template_id?: string | null
+          name?: string
+          org_id?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["template_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_templates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -606,9 +807,10 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "owner" | "admin" | "agent" | "viewer"
+      app_role: "owner" | "admin" | "agent" | "viewer" | "super_admin"
       campaign_status:
         | "draft"
         | "scheduled"
@@ -616,6 +818,8 @@ export type Database = {
         | "sent"
         | "failed"
         | "cancelled"
+        | "pending_approval"
+        | "approved"
       channel_type: "whatsapp" | "instagram" | "facebook"
       chat_mode: "ai" | "human"
       connection_status: "disconnected" | "pending" | "connected" | "error"
@@ -625,7 +829,16 @@ export type Database = {
       message_sender_type: "customer" | "agent" | "ai" | "system"
       message_status: "queued" | "sent" | "delivered" | "read" | "failed"
       payment_status: "cash" | "upi" | "online" | "unpaid"
+      queue_status: "pending" | "processing" | "sent" | "failed"
       recipient_status: "pending" | "sent" | "delivered" | "read" | "failed"
+      template_category: "marketing" | "utility" | "authentication"
+      template_status: "draft" | "pending" | "approved" | "rejected"
+      whatsapp_connection_status:
+        | "disconnected"
+        | "pending"
+        | "connected"
+        | "error"
+      whatsapp_connection_type: "cloud_api" | "coexistence"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -753,7 +966,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["owner", "admin", "agent", "viewer"],
+      app_role: ["owner", "admin", "agent", "viewer", "super_admin"],
       campaign_status: [
         "draft",
         "scheduled",
@@ -761,6 +974,8 @@ export const Constants = {
         "sent",
         "failed",
         "cancelled",
+        "pending_approval",
+        "approved",
       ],
       channel_type: ["whatsapp", "instagram", "facebook"],
       chat_mode: ["ai", "human"],
@@ -771,7 +986,17 @@ export const Constants = {
       message_sender_type: ["customer", "agent", "ai", "system"],
       message_status: ["queued", "sent", "delivered", "read", "failed"],
       payment_status: ["cash", "upi", "online", "unpaid"],
+      queue_status: ["pending", "processing", "sent", "failed"],
       recipient_status: ["pending", "sent", "delivered", "read", "failed"],
+      template_category: ["marketing", "utility", "authentication"],
+      template_status: ["draft", "pending", "approved", "rejected"],
+      whatsapp_connection_status: [
+        "disconnected",
+        "pending",
+        "connected",
+        "error",
+      ],
+      whatsapp_connection_type: ["cloud_api", "coexistence"],
     },
   },
 } as const
