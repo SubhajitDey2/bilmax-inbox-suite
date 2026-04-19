@@ -66,23 +66,21 @@ export default function WhatsAppConnection() {
     setSaving(true);
     // NOTE: real encryption should be done server-side via an edge function.
     // Here we mark fields as "encrypted" by prefix, replaced by real KMS later.
-    const payload = {
+    const payload: Record<string, any> = {
       org_id: primaryOrgId,
       connection_type: connectionType,
       display_name: displayName,
       meta_app_id: metaAppId || null,
       phone_number_id: phoneNumberId || null,
       whatsapp_business_account_id: wabaId || null,
-      access_token_encrypted: accessToken ? `enc:${accessToken}` : undefined,
-      app_secret_encrypted: appSecret ? `enc:${appSecret}` : undefined,
-      status: phoneNumberId && accessToken ? "pending" : "disconnected",
+      status: (phoneNumberId && accessToken ? "pending" : "disconnected") as "pending" | "disconnected",
     };
-    // Strip undefined to preserve existing token if not changed
-    Object.keys(payload).forEach((k) => (payload as any)[k] === undefined && delete (payload as any)[k]);
+    if (accessToken) payload.access_token_encrypted = `enc:${accessToken}`;
+    if (appSecret) payload.app_secret_encrypted = `enc:${appSecret}`;
 
     const { error } = accountId
       ? await supabase.from("whatsapp_accounts").update(payload).eq("id", accountId)
-      : await supabase.from("whatsapp_accounts").insert(payload);
+      : await supabase.from("whatsapp_accounts").insert(payload as any);
 
     setSaving(false);
     if (error) toast.error(error.message);

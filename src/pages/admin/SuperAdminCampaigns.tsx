@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Pause, X } from "lucide-react";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 
 interface Row {
