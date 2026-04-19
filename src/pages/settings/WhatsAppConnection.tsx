@@ -79,7 +79,7 @@ export default function WhatsAppConnection() {
     if (appSecret) payload.app_secret_encrypted = `enc:${appSecret}`;
 
     const { error } = accountId
-      ? await supabase.from("whatsapp_accounts").update(payload).eq("id", accountId)
+      ? await supabase.from("whatsapp_accounts").update(payload as any).eq("id", accountId)
       : await supabase.from("whatsapp_accounts").insert(payload as any);
 
     setSaving(false);
